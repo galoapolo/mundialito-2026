@@ -61,7 +61,8 @@ async function cargarTabla() {
         .pname { flex: 1; min-width: 0; }
         .pname-main { font-size: 14px; font-weight: 700; color: var(--mw-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .pname-sub { font-size: 12px; margin-top: 1px; display: flex; align-items: center; gap: 6px; }
-        .champ-pill { font-size: 11px; font-weight: 700; padding: 1px 9px; border-radius: 10px; background: var(--mw-verde-suave); color: var(--mw-verde-texto); white-space: nowrap; }
+        .champ-pill { font-size: 11px; font-weight: 700; padding: 1px 9px; border-radius: 10px; background: var(--mw-verde-suave); color: var(--mw-verde-texto); white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
+        .champ-pill img.flag { width: 16px; height: 12px; object-fit: cover; border-radius: 2px; }
         .trow.you .champ-pill { background: #FFFFFF; color: var(--mw-verde-texto); }
         .pscore { text-align: right; flex-shrink: 0; }
         .pscore-val { font-size: 18px; font-weight: 700; color: var(--mw-text); }
@@ -112,7 +113,7 @@ async function cargarTabla() {
         let campeonHTML = '';
         if (campeonEquipo) {
           const eq = obtenerEquipo(campeonEquipo);
-          campeonHTML = `<span class="champ-pill">Campeón: ${eq.es} ${eq.flag}</span>`;
+          campeonHTML = `<span class="champ-pill">Campeón: ${eq.es} ${renderBandera(eq)}</span>`;
         }
 
         html += `

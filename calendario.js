@@ -1,7 +1,7 @@
 // ============================================================
 // calendario.js — Mundialito 2026
 // Pantalla "Calendario completo" — todos los partidos del torneo
-// organizados por fase, con posibilidad de predecir con anticipación
+// en orden cronológico, con filtro opcional por fase
 // ============================================================
 
 let calendarioCache = null;
@@ -25,59 +25,36 @@ async function cargarCalendario() {
     const predMap = {};
     predicciones.forEach(p => predMap[p.partido_id] = p);
 
-    calendarioCache = { partidos, predMap };
+    // Orden cronológico global
+    const ordenados = [...partidos].sort((a, b) => new Date(a.fecha_hora_utc) - new Date(b.fecha_hora_utc));
 
-    // Agrupar por fase
-    const porFase = {};
-    CONFIG.FASES.forEach(f => porFase[f] = []);
-    partidos.forEach(p => {
-      if (!porFase[p.fase]) porFase[p.fase] = [];
-      porFase[p.fase].push(p);
-    });
+    calendarioCache = { partidos: ordenados, predMap };
 
-    // Ordenar cada fase por fecha
-    Object.keys(porFase).forEach(fase => {
-      porFase[fase].sort((a, b) => new Date(a.fecha_hora_utc) - new Date(b.fecha_hora_utc));
-    });
+    // Fases presentes (para los filtros), en el orden de CONFIG.FASES
+    const fasesPresentes = CONFIG.FASES.filter(f => ordenados.some(p => p.fase === f));
 
-    // Construir selector de fases (tabs)
+    // Construir filtro de fases (chips) — "Todos" + cada fase presente
     let tabsHTML = '<div class="cal-tabs" id="cal-tabs">';
-    CONFIG.FASES.forEach((fase, idx) => {
-      const cantidad = porFase[fase] ? porFase[fase].length : 0;
-      if (cantidad === 0) return;
-      tabsHTML += `<button class="cal-tab ${idx === 0 ? 'active' : ''}" data-fase="${fase}">${CONFIG.NOMBRES_FASES[fase] || fase} <span class="cal-tab-count">${cantidad}</span></button>`;
+    tabsHTML += `<button class="cal-tab active" data-fase="TODOS">Todos</button>`;
+    fasesPresentes.forEach(fase => {
+      const cantidad = ordenados.filter(p => p.fase === fase).length;
+      tabsHTML += `<button class="cal-tab" data-fase="${fase}">${CONFIG.NOMBRES_FASES[fase] || fase} <span class="cal-tab-count">${cantidad}</span></button>`;
     });
     tabsHTML += '</div>';
 
-    let panelesHTML = '';
-    CONFIG.FASES.forEach((fase, idx) => {
-      const lista = porFase[fase];
-      if (!lista || lista.length === 0) return;
-
-      panelesHTML += `<div class="cal-panel ${idx === 0 ? 'active' : ''}" data-fase="${fase}">`;
-
-      // En fase de grupos, sub-agrupar por grupo
-      if (fase === 'GRUPOS') {
-        const porGrupo = {};
-        lista.forEach(p => {
-          const g = p.grupo || 'Sin grupo';
-          if (!porGrupo[g]) porGrupo[g] = [];
-          porGrupo[g].push(p);
-        });
-        Object.keys(porGrupo).sort().forEach(grupo => {
-          panelesHTML += `<div class="cal-group-label">${grupo}</div>`;
-          porGrupo[grupo].forEach(p => {
-            panelesHTML += renderTarjetaCalendario(p, predMap[p.partido_id]);
-          });
-        });
-      } else {
-        lista.forEach(p => {
-          panelesHTML += renderTarjetaCalendario(p, predMap[p.partido_id]);
-        });
+    // Lista de tarjetas en orden cronológico, con encabezados de fecha
+    let listaHTML = '<div id="cal-lista">';
+    let fechaAnterior = null;
+    ordenados.forEach(p => {
+      const fechaCorta = formatearFechaCorta(p.fecha_hora_utc);
+      let encabezadoFecha = '';
+      if (fechaCorta !== fechaAnterior) {
+        encabezadoFecha = `<div class="cal-date-row">${fechaCorta}</div>`;
+        fechaAnterior = fechaCorta;
       }
-
-      panelesHTML += '</div>';
+      listaHTML += `<div class="cal-item" data-fase-item="${p.fase}">${encabezadoFecha}${renderTarjetaPartido(p, predMap[p.partido_id], null)}</div>`;
     });
+    listaHTML += '</div>';
 
     contenedor.innerHTML = `
       <style>
@@ -86,24 +63,30 @@ async function cargarCalendario() {
         .cal-tab.active { background: var(--mw-azul); color: #FFFFFF; border-color: var(--mw-azul); }
         .cal-tab-count { font-size: 11px; background: rgba(255,255,255,0.25); border-radius: 8px; padding: 1px 6px; }
         .cal-tab:not(.active) .cal-tab-count { background: var(--mw-bg); color: var(--mw-text-ter); }
-        .cal-panel { display: none; }
-        .cal-panel.active { display: block; }
-        .cal-group-label { font-size: 13px; font-weight: 700; color: var(--mw-azul-texto); background: var(--mw-azul-suave); display: inline-block; padding: 3px 12px; border-radius: 10px; margin: 1rem 0 0.5rem; }
-        .cal-group-label:first-child { margin-top: 0; }
-        .cal-date-row { font-size: 11px; font-weight: 700; color: var(--mw-text-ter); text-transform: uppercase; letter-spacing: 0.05em; margin: 0.75rem 0 0.4rem; }
-        .cal-date-row:first-of-type { margin-top: 0; }
+        .cal-date-row { font-size: 11px; font-weight: 700; color: var(--mw-text-ter); text-transform: uppercase; letter-spacing: 0.05em; margin: 1rem 0 0.4rem; }
+        .cal-item:first-child .cal-date-row { margin-top: 0; }
+        .cal-item.hidden { display: none; }
       </style>
       ${tabsHTML}
-      ${panelesHTML}
+      ${listaHTML}
     `;
 
-    // Tabs
+    // Filtro por fase (sin perder el orden cronológico)
     contenedor.querySelectorAll('.cal-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         contenedor.querySelectorAll('.cal-tab').forEach(t => t.classList.remove('active'));
-        contenedor.querySelectorAll('.cal-panel').forEach(p => p.classList.remove('active'));
         tab.classList.add('active');
-        contenedor.querySelector(`.cal-panel[data-fase="${tab.dataset.fase}"]`).classList.add('active');
+        const fase = tab.dataset.fase;
+
+        contenedor.querySelectorAll('.cal-item').forEach(item => {
+          if (fase === 'TODOS' || item.dataset.faseItem === fase) {
+            item.classList.remove('hidden');
+          } else {
+            item.classList.add('hidden');
+          }
+        });
+
+        actualizarEncabezadosFecha(contenedor);
       });
     });
 
@@ -125,13 +108,28 @@ async function cargarCalendario() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Tarjeta de calendario: igual a la de partidos, pero con
-// la fecha completa visible (no solo la hora)
+// Cuando se filtra por fase, oculta encabezados de fecha
+// huérfanos y evita fechas duplicadas consecutivas entre
+// los items visibles.
 // ─────────────────────────────────────────────────────────────
-function renderTarjetaCalendario(partido, prediccion) {
-  const fechaCorta = formatearFechaCorta(partido.fecha_hora_utc);
-  const tarjetaBase = renderTarjetaPartido(partido, prediccion, null);
+function actualizarEncabezadosFecha(contenedor) {
+  const items = contenedor.querySelectorAll('.cal-item');
+  let fechaAnterior = null;
+  items.forEach(item => {
+    const dateRow = item.querySelector('.cal-date-row');
+    if (!dateRow) return;
 
-  // Insertar la fecha corta antes de la tarjeta como mini-encabezado
-  return `<div class="cal-date-row">${fechaCorta}</div>${tarjetaBase}`;
+    if (item.classList.contains('hidden')) {
+      dateRow.style.display = 'none';
+      return;
+    }
+
+    const fechaTexto = dateRow.textContent;
+    if (fechaTexto === fechaAnterior) {
+      dateRow.style.display = 'none';
+    } else {
+      dateRow.style.display = '';
+      fechaAnterior = fechaTexto;
+    }
+  });
 }

@@ -111,6 +111,7 @@ function renderTarjetaPartido(partido, prediccion, puntos) {
   const estado = badgeEstado(partido.estado);
   const editable = puedeEditar(partido.estado);
   const esElim = partido.es_eliminatoria;
+  const esFinalizado = partido.estado === 'FINALIZADO';
 
   const valorLocal = prediccion ? prediccion.goles_local_pred : '';
   const valorVisitante = prediccion ? prediccion.goles_visitante_pred : '';
@@ -119,17 +120,17 @@ function renderTarjetaPartido(partido, prediccion, puntos) {
 
   const inputsDisabled = !editable || bloqueada;
 
-  // Mostrar resultado real si el partido ya terminó
-  let resultadoReal = '';
-  if (partido.estado === 'FINALIZADO') {
-    const gl = esElim && partido.goles_local_120 !== '' ? partido.goles_local_120 : partido.goles_local;
-    const gv = esElim && partido.goles_visitante_120 !== '' ? partido.goles_visitante_120 : partido.goles_visitante;
-    resultadoReal = `${gl} - ${gv}`;
+  // Resultado real (si el partido ya terminó)
+  let golesLocalReal = '';
+  let golesVisitanteReal = '';
+  if (esFinalizado) {
+    golesLocalReal = (esElim && partido.goles_local_120 !== '' && partido.goles_local_120 !== null) ? partido.goles_local_120 : partido.goles_local;
+    golesVisitanteReal = (esElim && partido.goles_visitante_120 !== '' && partido.goles_visitante_120 !== null) ? partido.goles_visitante_120 : partido.goles_visitante;
   }
 
   let extraHTML = '';
 
-  if (partido.estado === 'FINALIZADO') {
+  if (esFinalizado) {
     // Mostrar predicción del usuario vs resultado real + puntos obtenidos
     let textoPred = 'No registraste una predicción para este partido.';
     if (prediccion && prediccion.ganador_pred) {
@@ -179,32 +180,63 @@ function renderTarjetaPartido(partido, prediccion, puntos) {
     `;
   }
 
+  // ── Centro de la tarjeta: inputs editables, o resultado real grande ──
+  let centroHTML;
+  if (esFinalizado) {
+    centroHTML = `
+      <div class="score-result">
+        <span class="score-result-num">${golesLocalReal}</span>
+        <span class="vs-label">—</span>
+        <span class="score-result-num">${golesVisitanteReal}</span>
+      </div>
+    `;
+  } else {
+    centroHTML = `
+      <div class="score-inputs">
+        <input class="score-input" type="number" inputmode="numeric" min="0" max="20" data-side="local"
+          value="${valorLocal}" placeholder="–" ${inputsDisabled ? 'disabled' : ''}>
+        <span class="vs-label">—</span>
+        <input class="score-input" type="number" inputmode="numeric" min="0" max="20" data-side="visitante"
+          value="${valorVisitante}" placeholder="–" ${inputsDisabled ? 'disabled' : ''}>
+      </div>
+    `;
+  }
+
   return `
     <div class="match-card" data-partido-id="${partido.partido_id}" data-es-elim="${esElim}" data-equipo-local="${partido.equipo_local}" data-equipo-visitante="${partido.equipo_visitante}">
       <div class="match-top">
-        <span class="match-meta">${partido.grupo ? partido.grupo + ' · ' : ''}${formatearHoraLocal(partido.fecha_hora_utc)}${resultadoReal ? ' · ' + resultadoReal : ''}</span>
+        <span class="match-meta">${partido.grupo ? partido.grupo + ' · ' : ''}${formatearHoraLocal(partido.fecha_hora_utc)}</span>
         <span class="match-status ${estado.clase}">${estado.texto}</span>
       </div>
       <div class="teams-row">
         <div class="team">
-          <span class="flag" aria-hidden="true">${local.flag}</span>
+          ${renderBandera(local)}
           <span class="name">${local.es}</span>
         </div>
-        <div class="score-inputs">
-          <input class="score-input" type="number" inputmode="numeric" min="0" max="20" data-side="local"
-            value="${valorLocal}" placeholder="–" ${inputsDisabled || partido.estado === 'FINALIZADO' ? 'disabled' : ''}>
-          <span class="vs-label">—</span>
-          <input class="score-input" type="number" inputmode="numeric" min="0" max="20" data-side="visitante"
-            value="${valorVisitante}" placeholder="–" ${inputsDisabled || partido.estado === 'FINALIZADO' ? 'disabled' : ''}>
-        </div>
+        ${centroHTML}
         <div class="team right">
           <span class="name">${visitante.es}</span>
-          <span class="flag" aria-hidden="true">${visitante.flag}</span>
+          ${renderBandera(visitante)}
         </div>
       </div>
       ${extraHTML}
     </div>
   `;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Renderiza la bandera de un equipo como imagen (flagcdn.com).
+// Si no hay flagUrl (equipo "Por definir" o EMPATE), muestra
+// un placeholder con el emoji/texto disponible.
+// ─────────────────────────────────────────────────────────────
+function renderBandera(equipo) {
+  if (equipo.flagUrl) {
+    return `<img class="flag" src="${equipo.flagUrl}" alt="" loading="lazy">`;
+  }
+  if (equipo.flag) {
+    return `<span class="flag flag-emoji" aria-hidden="true">${equipo.flag}</span>`;
+  }
+  return '';
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -244,8 +276,6 @@ function attachEventosTarjeta(cardEl, sesion, onGuardado) {
     const local = parseInt(golesLocal);
     const visitante = parseInt(golesVisitante);
     let ganadorPred;
-    const teamLocal = cardEl.querySelector('.team:not(.right) .name').textContent;
-    const teamVisitante = cardEl.querySelector('.team.right .name').textContent;
 
     // Necesitamos los nombres originales (en inglés) para guardar — los recuperamos del dataset
     const nombreLocalAPI = cardEl.dataset.equipoLocal;

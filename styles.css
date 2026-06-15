@@ -4,22 +4,30 @@
    ============================================================ */
 
 :root {
-  /* Colores oficiales Mundial 2026 */
-  --mw-rojo:        #C8102E;
-  --mw-rojo-suave:  #FBE4E8;
-  --mw-rojo-texto:  #8A0E22;
+  /* Colores oficiales Mundial 2026 — tonos vibrantes del logo FIFA */
+  --mw-rojo:        #E0282E;
+  --mw-rojo-suave:  #FCE0E1;
+  --mw-rojo-texto:  #A3171C;
 
-  --mw-verde:       #00843D;
-  --mw-verde-suave: #E1F5EA;
-  --mw-verde-texto: #00592A;
+  --mw-verde:       #2BA84A;
+  --mw-verde-suave: #E0F5E5;
+  --mw-verde-texto: #1F7A35;
 
-  --mw-azul:        #0047AB;
-  --mw-azul-suave:  #E4ECFB;
-  --mw-azul-texto:  #00307A;
+  --mw-azul:        #1E5FD8;
+  --mw-azul-suave:  #E2EBFC;
+  --mw-azul-texto:  #1A45A0;
 
-  --mw-dorado:      #F2B705;
-  --mw-dorado-suave:#FDF3D8;
-  --mw-dorado-texto:#7A5C00;
+  --mw-dorado:      #F7B23B;
+  --mw-dorado-suave:#FDF0DA;
+  --mw-dorado-texto:#9A5C0B;
+
+  --mw-morado:      #8B5CF6;
+  --mw-morado-suave:#EDE6FD;
+  --mw-morado-texto:#5B30C9;
+
+  --mw-turquesa:    #1FBFBF;
+  --mw-turquesa-suave:#DCF6F6;
+  --mw-turquesa-texto:#0E7A7A;
 
   /* Layout */
   --mw-bg:          #F7F7F5;
@@ -95,18 +103,35 @@ button, input, select {
 .login-logo .flag-stripes {
   width: 44px;
   height: 44px;
-  border-radius: var(--mw-radius-sm);
+  border-radius: 12px;
   overflow: hidden;
   flex-shrink: 0;
+  background: conic-gradient(
+    from 0deg,
+    var(--mw-turquesa) 0deg 60deg,
+    var(--mw-azul) 60deg 120deg,
+    var(--mw-morado) 120deg 180deg,
+    var(--mw-rojo) 180deg 240deg,
+    var(--mw-dorado) 240deg 300deg,
+    var(--mw-verde) 300deg 360deg
+  );
+  position: relative;
+}
+.login-logo .flag-stripes::after {
+  content: '⚽';
+  position: absolute;
+  inset: 0;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  background: rgba(255,255,255,0.85);
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  margin: auto;
+  top: 0; bottom: 0; left: 0; right: 0;
 }
-.login-logo .flag-stripes span {
-  flex: 1;
-}
-.login-logo .flag-stripes span:nth-child(1) { background: var(--mw-rojo); }
-.login-logo .flag-stripes span:nth-child(2) { background: #FFFFFF; }
-.login-logo .flag-stripes span:nth-child(3) { background: var(--mw-verde); }
 
 .login-title {
   font-size: 20px;
@@ -219,16 +244,35 @@ button, input, select {
 .sidebar-logo .flag-stripes {
   width: 36px;
   height: 36px;
-  border-radius: var(--mw-radius-sm);
+  border-radius: 10px;
   overflow: hidden;
   flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
+  background: conic-gradient(
+    from 0deg,
+    var(--mw-turquesa) 0deg 60deg,
+    var(--mw-azul) 60deg 120deg,
+    var(--mw-morado) 120deg 180deg,
+    var(--mw-rojo) 180deg 240deg,
+    var(--mw-dorado) 240deg 300deg,
+    var(--mw-verde) 300deg 360deg
+  );
+  position: relative;
 }
-.sidebar-logo .flag-stripes span { flex: 1; }
-.sidebar-logo .flag-stripes span:nth-child(1) { background: var(--mw-rojo); }
-.sidebar-logo .flag-stripes span:nth-child(2) { background: #FFFFFF; }
-.sidebar-logo .flag-stripes span:nth-child(3) { background: var(--mw-verde); }
+.sidebar-logo .flag-stripes::after {
+  content: '⚽';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  background: rgba(255,255,255,0.85);
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  margin: auto;
+  top: 0; bottom: 0; left: 0; right: 0;
+}
 
 .sidebar-logo-text {
   font-size: 15px;
@@ -517,9 +561,20 @@ button, input, select {
   text-align: right;
 }
 .team .flag {
-  font-size: 24px;
   flex-shrink: 0;
   line-height: 1;
+}
+.team .flag.flag-emoji {
+  font-size: 24px;
+}
+img.team .flag,
+.team img.flag {
+  width: 28px;
+  height: 21px;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 1px solid var(--mw-border);
+  display: block;
 }
 .team .name {
   overflow: hidden;
@@ -533,6 +588,27 @@ button, input, select {
   gap: 6px;
   flex-shrink: 0;
 }
+
+/* Resultado real (partidos finalizados) — grande y centrado */
+.score-result {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-shrink: 0;
+  min-width: 90px;
+}
+.score-result-num {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--mw-text);
+  min-width: 28px;
+  text-align: center;
+}
+.score-result .vs-label {
+  font-size: 14px;
+}
+
 .score-input {
   width: 42px;
   height: 42px;
@@ -759,7 +835,14 @@ button, input, select {
     height: 38px;
     font-size: 16px;
   }
-  .team .flag {
+  .team .flag.flag-emoji {
+    font-size: 22px;
+  }
+  .team img.flag {
+    width: 24px;
+    height: 18px;
+  }
+  .score-result-num {
     font-size: 22px;
   }
 }

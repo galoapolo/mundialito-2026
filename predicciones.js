@@ -69,13 +69,14 @@ async function cargarPredicciones() {
         .champ-select-row { display: flex; gap: 8px; flex-wrap: wrap; }
         .champ-select { flex: 1; min-width: 180px; height: 44px; border: 1.5px solid var(--mw-border); border-radius: var(--mw-radius-md); padding: 0 12px; font-size: 14px; background: var(--mw-bg); color: var(--mw-text); }
         .champ-locked { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--mw-verde-suave); border-radius: var(--mw-radius-md); }
-        .champ-locked .flag { font-size: 28px; }
+        .champ-locked .flag { width: 40px; height: 30px; object-fit: cover; border-radius: 4px; font-size: 28px; }
         .champ-locked-text { font-size: 14px; font-weight: 700; color: var(--mw-verde-texto); }
         .champ-locked-sub { font-size: 12px; color: var(--mw-verde-texto); opacity: 0.8; }
 
         .pred-group { background: var(--mw-card-bg); border: 1px solid var(--mw-border); border-radius: var(--mw-radius-lg); padding: 14px 16px; margin-bottom: 10px; }
         .pred-group-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; flex-wrap: wrap; }
         .pred-group-teams { font-size: 14px; font-weight: 700; color: var(--mw-text); display: flex; align-items: center; gap: 6px; }
+        .pred-group-teams img.flag { width: 22px; height: 16px; object-fit: cover; border-radius: 3px; }
         .pred-group-meta { font-size: 12px; color: var(--mw-text-sec); font-weight: 600; }
         .pred-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--mw-border-soft); }
         .pred-row:first-of-type { border-top: none; }
@@ -163,7 +164,7 @@ function renderSeccionCampeon(miCampeon, especiales, sesion) {
         <div class="champ-title">Tu campeón del Mundial</div>
         <div class="champ-desc">Esta predicción no se puede cambiar — vale 15 puntos si aciertas.</div>
         <div class="champ-locked">
-          <span class="flag" aria-hidden="true">${eq.flag}</span>
+          ${renderBandera(eq)}
           <div>
             <div class="champ-locked-text">${eq.es}</div>
             <div class="champ-locked-sub">Predicción bloqueada</div>
@@ -247,7 +248,7 @@ function renderGrupoPredicciones(partido, predicciones, sesion) {
     <div class="pred-group">
       <div class="pred-group-header">
         <div class="pred-group-teams">
-          <span aria-hidden="true">${local.flag}</span> ${local.es} vs ${visitante.es} <span aria-hidden="true">${visitante.flag}</span>
+          ${renderBandera(local)} ${local.es} vs ${visitante.es} ${renderBandera(visitante)}
         </div>
         <div class="pred-group-meta">${metaTxt}</div>
       </div>
