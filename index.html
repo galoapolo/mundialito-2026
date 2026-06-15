@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Mundialito 2026</title>
+  <meta name="description" content="Pronósticos del Mundial 2026 con la familia y amigos">
+
+  <!-- Iconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/tabler-icons.min.css">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       PANTALLA DE LOGIN
+       ============================================================ -->
+  <div class="login-screen" id="login-screen">
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="flag-stripes" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <div>
+          <div class="login-title">Mundialito 2026</div>
+          <div class="login-subtitle">Pronósticos en familia ⚽</div>
+        </div>
+      </div>
+
+      <div class="login-error" id="login-error"></div>
+
+      <div class="login-field">
+        <label for="input-nombre">Tu apodo</label>
+        <input type="text" id="input-nombre" placeholder="Ej: Galo" maxlength="20" autocomplete="off">
+        <div class="hint">Así te van a ver los demás en la tabla.</div>
+      </div>
+
+      <div class="login-field">
+        <label for="input-pin">PIN de 4 dígitos</label>
+        <input type="password" id="input-pin" placeholder="••••" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+        <div class="hint">Si es tu primera vez, este será tu PIN. Si ya tienes cuenta, ingresa el mismo.</div>
+      </div>
+
+      <button class="login-btn" id="btn-login">Entrar</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       APP PRINCIPAL
+       ============================================================ -->
+  <div class="app-shell" id="app-shell">
+
+    <!-- Sidebar (desktop) -->
+    <nav class="sidebar" aria-label="Navegación principal">
+      <div class="sidebar-logo">
+        <div class="flag-stripes" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <div>
+          <div class="sidebar-logo-text">Mundialito 2026</div>
+          <div class="sidebar-logo-sub">Pronósticos en familia</div>
+        </div>
+      </div>
+
+      <div class="sidebar-nav">
+        <a href="#" class="nav-item active" data-section="partidos">
+          <i class="ti ti-ball-football" aria-hidden="true"></i>
+          Partidos
+        </a>
+        <a href="#" class="nav-item" data-section="calendario">
+          <i class="ti ti-calendar" aria-hidden="true"></i>
+          Calendario
+        </a>
+        <a href="#" class="nav-item" data-section="tabla">
+          <i class="ti ti-trophy" aria-hidden="true"></i>
+          Tabla
+        </a>
+        <a href="#" class="nav-item" data-section="predicciones">
+          <i class="ti ti-users" aria-hidden="true"></i>
+          Predicciones
+        </a>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="avatar" id="sidebar-avatar">?</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="sidebar-username">—</div>
+            <div class="sidebar-user-action" id="btn-logout">Cerrar sesión</div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <main class="main-content">
+
+      <!-- SECCIÓN: PARTIDOS DE HOY -->
+      <section class="section active" id="section-partidos">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Partidos de hoy</div>
+            <div class="page-subtitle" id="partidos-fecha">Cargando...</div>
+          </div>
+          <div class="mobile-user-pill">
+            <div class="avatar" id="mobile-avatar">?</div>
+            <span id="mobile-username">—</span>
+          </div>
+        </div>
+        <div id="partidos-contenido">
+          <div class="loading-spinner"><i class="ti ti-loader-2" aria-hidden="true"></i> Cargando partidos...</div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN: CALENDARIO -->
+      <section class="section" id="section-calendario">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Calendario completo</div>
+            <div class="page-subtitle">Todos los partidos del torneo — predice con anticipación</div>
+          </div>
+          <div class="mobile-user-pill">
+            <div class="avatar" id="mobile-avatar-2">?</div>
+            <span id="mobile-username-2">—</span>
+          </div>
+        </div>
+        <div id="calendario-contenido">
+          <div class="loading-spinner"><i class="ti ti-loader-2" aria-hidden="true"></i> Cargando calendario...</div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN: TABLA -->
+      <section class="section" id="section-tabla">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Tabla de posiciones</div>
+            <div class="page-subtitle" id="tabla-subtitle">Cargando...</div>
+          </div>
+          <div class="mobile-user-pill">
+            <div class="avatar" id="mobile-avatar-3">?</div>
+            <span id="mobile-username-3">—</span>
+          </div>
+        </div>
+        <div id="tabla-contenido">
+          <div class="loading-spinner"><i class="ti ti-loader-2" aria-hidden="true"></i> Cargando tabla...</div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN: PREDICCIONES DE TODOS -->
+      <section class="section" id="section-predicciones">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Predicciones</div>
+            <div class="page-subtitle">Lo que cada uno pronosticó — solo puedes editar las tuyas</div>
+          </div>
+          <div class="mobile-user-pill">
+            <div class="avatar" id="mobile-avatar-4">?</div>
+            <span id="mobile-username-4">—</span>
+          </div>
+        </div>
+        <div id="predicciones-contenido">
+          <div class="loading-spinner"><i class="ti ti-loader-2" aria-hidden="true"></i> Cargando predicciones...</div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom nav (mobile) -->
+    <nav class="bottom-nav" aria-label="Navegación móvil">
+      <div class="bottom-nav-items">
+        <a href="#" class="bottom-nav-item active" data-section="partidos">
+          <i class="ti ti-ball-football" aria-hidden="true"></i>
+          Partidos
+        </a>
+        <a href="#" class="bottom-nav-item" data-section="calendario">
+          <i class="ti ti-calendar" aria-hidden="true"></i>
+          Calendario
+        </a>
+        <a href="#" class="bottom-nav-item" data-section="tabla">
+          <i class="ti ti-trophy" aria-hidden="true"></i>
+          Tabla
+        </a>
+        <a href="#" class="bottom-nav-item" data-section="predicciones">
+          <i class="ti ti-users" aria-hidden="true"></i>
+          Predicciones
+        </a>
+      </div>
+    </nav>
+
+  </div>
+
+  <!-- Toast de notificaciones -->
+  <div class="toast" id="toast"></div>
+
+  <script src="config.js"></script>
+  <script src="api.js"></script>
+  <script src="ui.js"></script>
+  <script src="partidos.js"></script>
+  <script src="calendario.js"></script>
+  <script src="tabla.js"></script>
+  <script src="predicciones.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
