@@ -35,9 +35,9 @@
       </div>
 
       <div class="login-field">
-        <label for="input-pin">PIN de 4 dígitos</label>
-        <input type="password" id="input-pin" placeholder="••••" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
-        <div class="hint">Si es tu primera vez, este será tu PIN. Si ya tienes cuenta, ingresa el mismo.</div>
+        <label for="input-pin">Año de nacimiento</label>
+        <input type="text" id="input-pin" placeholder="Ej: 1990" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+        <div class="hint">Si es tu primera vez, este será tu clave para identificarte. Si ya tienes cuenta, ingresa el mismo año.</div>
       </div>
 
       <button class="login-btn" id="btn-login">Entrar</button>
@@ -84,6 +84,9 @@
           <div class="sidebar-user-info">
             <div class="sidebar-user-name" id="sidebar-username">—</div>
             <div class="sidebar-user-action" id="btn-logout">Cerrar sesión</div>
+          </div>
+          <div class="sidebar-help-btn" id="btn-help" title="¿Cómo funciona la app?">
+            <i class="ti ti-help-circle" aria-hidden="true"></i>
           </div>
         </div>
       </div>
@@ -188,6 +191,55 @@
 
   <!-- Toast de notificaciones -->
   <div class="toast" id="toast"></div>
+
+  <!-- Modal de bienvenida (solo primera vez) -->
+  <div class="modal-overlay" id="welcome-modal">
+    <div class="modal-card">
+      <div class="modal-icon">⚽</div>
+      <div class="modal-title">¡Bienvenido a Mundialito 2026!</div>
+      <div class="modal-subtitle">Así funciona la app, en pocas palabras:</div>
+
+      <div class="modal-steps">
+        <div class="modal-step">
+          <div class="modal-step-icon"><i class="ti ti-ball-football" aria-hidden="true"></i></div>
+          <div>
+            <div class="modal-step-title">Predice los partidos</div>
+            <div class="modal-step-desc">En <b>Partidos</b> ves los de hoy. Ingresa el marcador antes de que empiece — se cierra automáticamente 10 minutos antes.</div>
+          </div>
+        </div>
+        <div class="modal-step">
+          <div class="modal-step-icon"><i class="ti ti-calendar" aria-hidden="true"></i></div>
+          <div>
+            <div class="modal-step-title">Adelántate en el Calendario</div>
+            <div class="modal-step-desc">Puedes predecir cualquier partido futuro del torneo con anticipación, no solo los de hoy.</div>
+          </div>
+        </div>
+        <div class="modal-step">
+          <div class="modal-step-icon"><i class="ti ti-trophy" aria-hidden="true"></i></div>
+          <div>
+            <div class="modal-step-title">Elige tu campeón</div>
+            <div class="modal-step-desc">En <b>Predicciones</b>, elige el equipo que crees ganará el Mundial. Vale 15 puntos extra — pero solo puedes elegirlo una vez.</div>
+          </div>
+        </div>
+        <div class="modal-step">
+          <div class="modal-step-icon"><i class="ti ti-users" aria-hidden="true"></i></div>
+          <div>
+            <div class="modal-step-title">Compite con todos</div>
+            <div class="modal-step-desc">En <b>Predicciones</b> ves lo que cada uno pronosticó (solo editas las tuyas), y en <b>Tabla</b> el ranking general.</div>
+          </div>
+        </div>
+        <div class="modal-step">
+          <div class="modal-step-icon"><i class="ti ti-target-arrow" aria-hidden="true"></i></div>
+          <div>
+            <div class="modal-step-title">Puntos</div>
+            <div class="modal-step-desc">3 pts por ganador correcto, 5 pts por marcador exacto, +1 pt por diferencia de goles, +2 pts por adivinar si hay penales. ¡Todo se duplica en la final!</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="login-btn" id="btn-welcome-close">Entendido, ¡vamos!</button>
+    </div>
+  </div>
 
   <script src="config.js"></script>
   <script src="api.js"></script>

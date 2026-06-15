@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   inicializarLogin();
   inicializarNavegacion();
   inicializarLogout();
+  inicializarModalBienvenida();
 });
 
 // ─────────────────────────────────────────────────────────────
@@ -31,7 +32,7 @@ function inicializarLogin() {
   const inputPin = document.getElementById('input-pin');
   const errorEl = document.getElementById('login-error');
 
-  // Solo permitir dígitos en el PIN
+  // Solo permitir dígitos en el año de nacimiento
   inputPin.addEventListener('input', () => {
     inputPin.value = inputPin.value.replace(/\D/g, '').slice(0, 4);
   });
@@ -54,7 +55,7 @@ function inicializarLogin() {
       return;
     }
     if (!/^\d{4}$/.test(pin)) {
-      mostrarErrorLogin('El PIN debe tener exactamente 4 dígitos.');
+      mostrarErrorLogin('Ingresa tu año de nacimiento (4 dígitos), ej: 1990.');
       return;
     }
 
@@ -65,10 +66,11 @@ function inicializarLogin() {
       const resultado = await login(nombre, pin);
       if (resultado.exito) {
         const sesion = { usuario_id: resultado.usuario_id, nombre: resultado.nombre };
+        iniciarApp(sesion);
         if (resultado.nuevo) {
           mostrarToast(`¡Bienvenido, ${resultado.nombre}! Tu cuenta fue creada.`, 'success');
+          mostrarModalBienvenida();
         }
-        iniciarApp(sesion);
       } else {
         mostrarErrorLogin(resultado.error || 'No se pudo iniciar sesión.');
         btn.disabled = false;
@@ -93,11 +95,28 @@ function inicializarLogin() {
 // ─────────────────────────────────────────────────────────────
 function inicializarLogout() {
   document.getElementById('btn-logout').addEventListener('click', () => {
-    if (confirm('¿Cerrar sesión? Necesitarás tu apodo y PIN para volver a entrar.')) {
+    if (confirm('¿Cerrar sesión? Necesitarás tu apodo y año de nacimiento para volver a entrar.')) {
       cerrarSesion();
       location.reload();
     }
   });
+}
+
+// ─────────────────────────────────────────────────────────────
+// MODAL DE BIENVENIDA (solo la primera vez)
+// ─────────────────────────────────────────────────────────────
+function mostrarModalBienvenida() {
+  document.getElementById('welcome-modal').classList.add('visible');
+}
+
+function inicializarModalBienvenida() {
+  document.getElementById('btn-welcome-close').addEventListener('click', () => {
+    document.getElementById('welcome-modal').classList.remove('visible');
+  });
+  const helpBtn = document.getElementById('btn-help');
+  if (helpBtn) {
+    helpBtn.addEventListener('click', () => mostrarModalBienvenida());
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
