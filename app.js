@@ -113,10 +113,13 @@ function inicializarModalBienvenida() {
   document.getElementById('btn-welcome-close').addEventListener('click', () => {
     document.getElementById('welcome-modal').classList.remove('visible');
   });
-  const helpBtn = document.getElementById('btn-help');
-  if (helpBtn) {
-    helpBtn.addEventListener('click', () => mostrarModalBienvenida());
-  }
+  // Botón ? del sidebar (desktop)
+  const helpSidebar = document.getElementById('btn-help');
+  if (helpSidebar) helpSidebar.addEventListener('click', () => mostrarModalBienvenida());
+  // Botones ? flotantes en cada sección (mobile + desktop)
+  document.querySelectorAll('.help-btn-float').forEach(btn => {
+    btn.addEventListener('click', () => mostrarModalBienvenida());
+  });
 }
 
 // ─────────────────────────────────────────────────────────────
