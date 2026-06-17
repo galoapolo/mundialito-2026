@@ -6,6 +6,14 @@
   <title>Mundialito 2026</title>
   <meta name="description" content="Pronósticos del Mundial 2026 con la familia y amigos">
 
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1E5FD8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Mundialito 2026">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
   <!-- Iconos -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/tabler-icons.min.css">
 
@@ -75,6 +83,10 @@
         <a href="#" class="nav-item" data-section="predicciones">
           <i class="ti ti-users" aria-hidden="true"></i>
           Predicciones
+        </a>
+        <a href="#" class="nav-item" data-section="invitar">
+          <i class="ti ti-share" aria-hidden="true"></i>
+          Invitar
         </a>
       </div>
 
@@ -173,6 +185,24 @@
         </div>
       </section>
 
+      <!-- SECCIÓN: INVITAR -->
+      <section class="section" id="section-invitar">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Invitar amigos</div>
+            <div class="page-subtitle">Comparte el Mundialito con tu familia y amigos</div>
+          </div>
+          <div class="top-actions">
+            <div class="mobile-user-pill">
+              <div class="avatar" id="mobile-avatar-5">?</div>
+              <span id="mobile-username-5">—</span>
+            </div>
+            <button class="help-btn-float">❓ Ayuda</button>
+          </div>
+        </div>
+        <div id="invitar-contenido"></div>
+      </section>
+
     </main>
 
     <!-- Bottom nav (mobile) -->
@@ -193,6 +223,10 @@
         <a href="#" class="bottom-nav-item" data-section="predicciones">
           <i class="ti ti-users" aria-hidden="true"></i>
           Predicciones
+        </a>
+        <a href="#" class="bottom-nav-item" data-section="invitar">
+          <i class="ti ti-share" aria-hidden="true"></i>
+          Invitar
         </a>
       </div>
     </nav>
@@ -258,6 +292,7 @@
   <script src="calendario.js"></script>
   <script src="tabla.js"></script>
   <script src="predicciones.js"></script>
+  <script src="invitar.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

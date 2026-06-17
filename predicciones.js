@@ -98,16 +98,16 @@ async function cargarPredicciones() {
 
         /* Badges de resultado */
         .pred-badges { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; align-items: center; }
-        .res-badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
-        .res-exact { background: var(--mw-dorado-suave); color: var(--mw-dorado-texto); }
-        .res-win   { background: var(--mw-verde-suave); color: var(--mw-verde-texto); }
-        .res-diff  { background: var(--mw-turquesa-suave); color: var(--mw-turquesa-texto); }
-        .res-pen   { background: var(--mw-morado-suave); color: var(--mw-morado-texto); }
-        .res-fail  { background: var(--mw-rojo-suave); color: var(--mw-rojo-texto); }
-        .res-fail-soft { background: var(--mw-bg); color: var(--mw-text-ter); border: 1px solid var(--mw-border); }
-        .pred-pts-badge { font-size: 12px; font-weight: 800; padding: 2px 10px; border-radius: 10px; margin-left: auto; white-space: nowrap; }
-        .pred-pts-badge.pts-ok   { background: var(--mw-azul); color: #FFFFFF; }
-        .pred-pts-badge.pts-zero { background: var(--mw-bg); color: var(--mw-text-ter); border: 1px solid var(--mw-border); }
+        .res-badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 10px; white-space: nowrap; color: #FFFFFF; }
+        .res-exact { background: #D97706; }
+        .res-win   { background: #16A34A; }
+        .res-diff  { background: #0891B2; }
+        .res-pen   { background: #7C3AED; }
+        .res-fail  { background: #DC2626; }
+        .res-fail-soft { background: #9CA3AF; color: #FFFFFF; }
+        .pred-pts-badge { font-size: 12px; font-weight: 800; padding: 3px 10px; border-radius: 10px; margin-left: auto; white-space: nowrap; }
+        .pred-pts-badge.pts-ok   { background: #1E5FD8; color: #FFFFFF; }
+        .pred-pts-badge.pts-zero { background: #E5E7EB; color: #6B7280; }
       </style>
       ${campeonHTML}
       ${listaHTML}
@@ -346,7 +346,7 @@ function renderGrupoPredicciones(partido, predicciones, sesion) {
 
     // Botón editar (solo si el partido no está cerrado y es el usuario actual)
     let editBtn = '';
-    if (esYo && puedeEditar(partido.estado) && !pred.bloqueada) {
+    if (esYo && puedeEditar(partido.estado, partido.fecha_hora_utc) && !pred.bloqueada) {
       editBtn = `<button class="pred-edit-btn" data-partido-id="${partido.partido_id}" data-fase="${partido.fase}">Editar</button>`;
     }
 

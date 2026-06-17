@@ -43,6 +43,7 @@ function irASeccion(nombreSeccion) {
   if (nombreSeccion === 'calendario' && typeof cargarCalendario === 'function') cargarCalendario();
   if (nombreSeccion === 'tabla' && typeof cargarTabla === 'function') cargarTabla();
   if (nombreSeccion === 'predicciones' && typeof cargarPredicciones === 'function') cargarPredicciones();
+  if (nombreSeccion === 'invitar'      && typeof cargarInvitar === 'function')      cargarInvitar();
 }
 
 function inicializarNavegacion() {
@@ -66,11 +67,11 @@ function iniciales(nombre) {
 
 function actualizarInfoUsuario(sesion) {
   const ini = iniciales(sesion.nombre);
-  ['sidebar-avatar', 'mobile-avatar', 'mobile-avatar-2', 'mobile-avatar-3', 'mobile-avatar-4'].forEach(id => {
+  ['sidebar-avatar', 'mobile-avatar', 'mobile-avatar-2', 'mobile-avatar-3', 'mobile-avatar-4', 'mobile-avatar-5'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.textContent = ini;
   });
-  ['sidebar-username', 'mobile-username', 'mobile-username-2', 'mobile-username-3', 'mobile-username-4'].forEach(id => {
+  ['sidebar-username', 'mobile-username', 'mobile-username-2', 'mobile-username-3', 'mobile-username-4', 'mobile-username-5'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.textContent = sesion.nombre;
   });
@@ -79,21 +80,31 @@ function actualizarInfoUsuario(sesion) {
 // ─────────────────────────────────────────────────────────────
 // BADGE DE ESTADO DE PARTIDO
 // ─────────────────────────────────────────────────────────────
-function badgeEstado(estado) {
+function badgeEstado(estado, fechaUTC) {
+  // Verificar tiempo real independientemente del estado en el Sheet
+  // Si faltan menos de 10 min o ya empezó → cerrado
+  if (fechaUTC && (estado === 'PENDIENTE' || estado === 'ABIERTO')) {
+    const minutosRestantes = (new Date(fechaUTC) - new Date()) / 60000;
+    if (minutosRestantes <= 10) {
+      return { clase: 'status-cerrado', texto: 'Cerrado' };
+    }
+  }
   const mapa = {
-    PENDIENTE: { clase: 'status-pendiente', texto: 'Próximamente' },
+    PENDIENTE: { clase: 'status-abierto',   texto: 'Abierto' },
     ABIERTO:   { clase: 'status-abierto',   texto: 'Abierto' },
     CERRADO:   { clase: 'status-cerrado',   texto: 'Cerrado' },
     FINALIZADO:{ clase: 'status-finalizado', texto: 'Finalizado' }
   };
-  // PENDIENTE se trata visualmente como "abierto para predecir"
-  if (estado === 'PENDIENTE') {
-    return { clase: 'status-abierto', texto: 'Abierto' };
-  }
   return mapa[estado] || { clase: 'status-pendiente', texto: estado };
 }
 
-function puedeEditar(estado) {
+function puedeEditar(estado, fechaUTC) {
+  if (estado === 'CERRADO' || estado === 'FINALIZADO') return false;
+  // Validar tiempo real — cerrar 10 min antes del kickoff
+  if (fechaUTC) {
+    const minutosRestantes = (new Date(fechaUTC) - new Date()) / 60000;
+    if (minutosRestantes <= 10) return false;
+  }
   return estado === 'PENDIENTE' || estado === 'ABIERTO';
 }
 
@@ -108,8 +119,8 @@ function puedeEditar(estado) {
 function renderTarjetaPartido(partido, prediccion, puntos) {
   const local = obtenerEquipo(partido.equipo_local);
   const visitante = obtenerEquipo(partido.equipo_visitante);
-  const estado = badgeEstado(partido.estado);
-  const editable = puedeEditar(partido.estado);
+  const estado = badgeEstado(partido.estado, partido.fecha_hora_utc);
+  const editable = puedeEditar(partido.estado, partido.fecha_hora_utc);
   const esElim = partido.es_eliminatoria;
   const esFinalizado = partido.estado === 'FINALIZADO';
 
