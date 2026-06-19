@@ -25,6 +25,7 @@ async function cargarPartidosHoy() {
     if (!respPartidos.exito) throw new Error('No se pudieron cargar los partidos.');
 
     const partidos    = respPartidos.partidos;
+    window._partidosCache = partidos; // cache global para el refresco adaptativo
     const predicciones = respPredicciones.exito ? respPredicciones.predicciones : [];
 
     // Mapa de predicciones por partido_id

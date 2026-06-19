@@ -496,24 +496,25 @@ button, input, select {
 
 /* Botón "?" de ayuda — siempre visible en todas las secciones */
 .help-btn-float {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: 1.5px solid var(--mw-border);
-  background: var(--mw-card-bg);
-  color: var(--mw-text-sec);
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 18px;
+  border: none;
+  background: var(--mw-azul);
+  color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
   flex-shrink: 0;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  gap: 5px;
+  transition: opacity 0.15s;
+  font-family: inherit;
 }
 .help-btn-float:hover {
-  background: var(--mw-azul-suave);
-  color: var(--mw-azul);
-  border-color: var(--mw-azul);
+  opacity: 0.85;
 }
 
 /* ============================================================
@@ -580,10 +581,24 @@ button, input, select {
   background: var(--mw-azul-suave);
   color: var(--mw-azul-texto);
 }
+.status-en-curso {
+  background: var(--mw-verde);
+  color: #FFFFFF;
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+@keyframes pulse-badge {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
+}
 .status-pendiente {
   background: var(--mw-bg);
   color: var(--mw-text-sec);
   border: 1px solid var(--mw-border);
+}
+
+/* Marcador en curso — levemente diferenciado del finalizado */
+.score-result.en-curso .score-result-num {
+  color: var(--mw-verde-texto);
 }
 
 .teams-row {

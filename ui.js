@@ -117,32 +117,100 @@ function puedeEditar(estado, fechaUTC) {
 // puntos: objeto con desglose de puntos si el partido ya finalizó (o null)
 // ─────────────────────────────────────────────────────────────
 function renderTarjetaPartido(partido, prediccion, puntos) {
-  const local = obtenerEquipo(partido.equipo_local);
+  const local     = obtenerEquipo(partido.equipo_local);
   const visitante = obtenerEquipo(partido.equipo_visitante);
-  const estado = badgeEstado(partido.estado, partido.fecha_hora_utc);
-  const editable = puedeEditar(partido.estado, partido.fecha_hora_utc);
-  const esElim = partido.es_eliminatoria;
-  const esFinalizado = partido.estado === 'FINALIZADO';
+  const esElim    = partido.es_eliminatoria;
 
-  const valorLocal = prediccion ? prediccion.goles_local_pred : '';
-  const valorVisitante = prediccion ? prediccion.goles_visitante_pred : '';
-  const valorPenales = prediccion ? prediccion.penales_pred : '';
-  const bloqueada = prediccion ? prediccion.bloqueada === true : false;
+  // ── Determinar estado real usando tiempo del dispositivo ──────
+  const ahora            = new Date();
+  const inicio           = partido.fecha_hora_utc ? new Date(partido.fecha_hora_utc) : null;
+  const minutosDesdeInicio = inicio ? (ahora - inicio) / 60000 : -999;
+  const minutosRestantes   = inicio ? (inicio - ahora) / 60000 : 999;
 
-  const inputsDisabled = !editable || bloqueada;
+  // Estado efectivo (más preciso que el del Sheet, que se actualiza cada 15 min)
+  let estadoEfectivo = partido.estado;
+  if (minutosRestantes <= 10 && estadoEfectivo === 'PENDIENTE') estadoEfectivo = 'CERRADO';
+  if (minutosRestantes <= 10 && estadoEfectivo === 'ABIERTO')   estadoEfectivo = 'CERRADO';
 
-  // Resultado real (si el partido ya terminó)
-  let golesLocalReal = '';
-  let golesVisitanteReal = '';
-  if (esFinalizado) {
-    golesLocalReal = (esElim && partido.goles_local_120 !== '' && partido.goles_local_120 !== null) ? partido.goles_local_120 : partido.goles_local;
-    golesVisitanteReal = (esElim && partido.goles_visitante_120 !== '' && partido.goles_visitante_120 !== null) ? partido.goles_visitante_120 : partido.goles_visitante;
+  const esFinalizado  = estadoEfectivo === 'FINALIZADO';
+  const estaEnCurso   = estadoEfectivo === 'CERRADO' && minutosDesdeInicio > 10;
+  const editable      = puedeEditar(partido.estado, partido.fecha_hora_utc);
+  const badgeInfo     = badgeEstado(partido.estado, partido.fecha_hora_utc);
+
+  // Badge especial si el partido está en curso (Sheet aún no lo marca FINALIZADO)
+  let badgeMostrar = badgeInfo;
+  if (estaEnCurso && !esFinalizado) {
+    // Estimar si ya terminó según duración máxima
+    const maxMin = esElim ? 185 : 110;
+    if (minutosDesdeInicio > maxMin) {
+      badgeMostrar = { clase: 'status-finalizado', texto: 'Posiblemente finalizado' };
+    } else {
+      badgeMostrar = { clase: 'status-en-curso', texto: '⚡ En curso' };
+    }
   }
 
+  const valorLocal      = prediccion ? prediccion.goles_local_pred     : '';
+  const valorVisitante  = prediccion ? prediccion.goles_visitante_pred  : '';
+  const valorPenales    = prediccion ? prediccion.penales_pred           : '';
+  const bloqueada       = prediccion ? prediccion.bloqueada === true     : false;
+
+  // ── Marcador real ──────────────────────────────────────────────
+  // Mostrar siempre que haya datos, incluso si el partido está en curso
+  const tieneGolesSheet = partido.goles_local !== '' && partido.goles_local !== null &&
+                          partido.goles_local !== undefined;
+
+  let golesLocalReal     = '';
+  let golesVisitanteReal = '';
+  if (tieneGolesSheet) {
+    golesLocalReal     = (esElim && partido.goles_local_120 !== '' && partido.goles_local_120 !== null)
+      ? partido.goles_local_120 : partido.goles_local;
+    golesVisitanteReal = (esElim && partido.goles_visitante_120 !== '' && partido.goles_visitante_120 !== null)
+      ? partido.goles_visitante_120 : partido.goles_visitante;
+  }
+
+  const mostrarMarcadorReal = tieneGolesSheet || esFinalizado;
+
+  // ── Centro de la tarjeta ───────────────────────────────────────
+  let centroHTML;
+  if (mostrarMarcadorReal) {
+    // Marcador real — grande y centrado
+    const gl = golesLocalReal !== '' ? golesLocalReal : '?';
+    const gv = golesVisitanteReal !== '' ? golesVisitanteReal : '?';
+    centroHTML = `
+      <div class="score-result ${estaEnCurso && !esFinalizado ? 'en-curso' : ''}">
+        <span class="score-result-num">${gl}</span>
+        <span class="vs-label">—</span>
+        <span class="score-result-num">${gv}</span>
+      </div>
+    `;
+  } else if (editable && !bloqueada) {
+    // Inputs de predicción editables
+    centroHTML = `
+      <div class="score-inputs">
+        <input class="score-input" type="number" inputmode="numeric" min="0" max="20" data-side="local"
+          value="${valorLocal}" placeholder="–">
+        <span class="vs-label">—</span>
+        <input class="score-input" type="number" inputmode="numeric" min="0" max="20" data-side="visitante"
+          value="${valorVisitante}" placeholder="–">
+      </div>
+    `;
+  } else {
+    // Partido por empezar pero cerrado, o bloqueado — mostrar predicción del usuario o guiones
+    const glMostrar = valorLocal !== '' && valorLocal !== null && valorLocal !== undefined ? valorLocal : '–';
+    const gvMostrar = valorVisitante !== '' && valorVisitante !== null && valorVisitante !== undefined ? valorVisitante : '–';
+    centroHTML = `
+      <div class="score-inputs">
+        <input class="score-input" type="number" disabled value="${glMostrar !== '–' ? glMostrar : ''}" placeholder="–">
+        <span class="vs-label">—</span>
+        <input class="score-input" type="number" disabled value="${gvMostrar !== '–' ? gvMostrar : ''}" placeholder="–">
+      </div>
+    `;
+  }
+
+  // ── Fila extra debajo de los equipos ──────────────────────────
   let extraHTML = '';
 
   if (esFinalizado) {
-    // Mostrar predicción del usuario vs resultado real + puntos obtenidos
     let textoPred = 'No registraste una predicción para este partido.';
     if (prediccion && prediccion.ganador_pred) {
       textoPred = `Tu predicción: <b>${valorLocal} - ${valorVisitante}</b>`;
@@ -151,18 +219,35 @@ function renderTarjetaPartido(partido, prediccion, puntos) {
       }
     }
     const ptsTotal = puntos ? puntos.pts_total : 0;
-    const claseP = ptsTotal > 0 ? 'points-pill' : 'points-pill cero';
+    const claseP   = ptsTotal > 0 ? 'points-pill' : 'points-pill cero';
     extraHTML = `
-      <div class="extra-row" style="justify-content: space-between;">
+      <div class="extra-row" style="justify-content:space-between;">
         <div class="your-pred" style="margin-top:0">${textoPred}</div>
         <span class="${claseP}">${ptsTotal} pts</span>
       </div>
     `;
-  } else if (bloqueada) {
+  } else if (estaEnCurso) {
+    // Partido en curso — mostrar predicción del usuario si la tiene
+    if (prediccion && prediccion.ganador_pred) {
+      extraHTML = `
+        <div class="locked-banner" style="background:var(--mw-azul-suave);color:var(--mw-azul-texto);">
+          <i class="ti ti-player-play" aria-hidden="true"></i>
+          Partido en curso — Tu predicción: <b>${valorLocal} - ${valorVisitante}</b>
+        </div>
+      `;
+    } else {
+      extraHTML = `
+        <div class="locked-banner" style="background:var(--mw-azul-suave);color:var(--mw-azul-texto);">
+          <i class="ti ti-player-play" aria-hidden="true"></i>
+          Partido en curso — no tenías predicción para este partido
+        </div>
+      `;
+    }
+  } else if (!editable || bloqueada) {
     extraHTML = `
       <div class="locked-banner">
         <i class="ti ti-lock" aria-hidden="true"></i>
-        Esta predicción ya no se puede editar — el partido está por comenzar o ya empezó
+        Predicciones cerradas — el partido empieza pronto
       </div>
       ${prediccion && prediccion.ganador_pred ? `<div class="your-pred">Tu predicción: <b>${valorLocal} - ${valorVisitante}</b></div>` : ''}
     `;
@@ -170,7 +255,7 @@ function renderTarjetaPartido(partido, prediccion, puntos) {
     let penalesHTML = '';
     if (esElim) {
       const siSel = valorPenales === true || valorPenales === 'TRUE' ? 'selected' : '';
-      const noSel = valorPenales === false || valorPenales === 'FALSE' || valorPenales === '' ? 'selected' : '';
+      const noSel = (!siSel) ? 'selected' : '';
       penalesHTML = `
         <div class="toggle-group">
           <span>¿Habrá penales?</span>
@@ -182,33 +267,11 @@ function renderTarjetaPartido(partido, prediccion, puntos) {
       `;
     }
     extraHTML = `
-      <div class="extra-row" style="${esElim ? 'flex-direction:column; align-items:stretch; gap:10px;' : ''}">
+      <div class="extra-row" style="${esElim ? 'flex-direction:column;align-items:stretch;gap:10px;' : ''}">
         ${penalesHTML}
-        <div style="display:flex; ${esElim ? '' : 'margin-left:auto;'}">
+        <div style="display:flex;${esElim ? '' : 'margin-left:auto;'}">
           <button class="save-btn" data-action="guardar">Guardar predicción</button>
         </div>
-      </div>
-    `;
-  }
-
-  // ── Centro de la tarjeta: inputs editables, o resultado real grande ──
-  let centroHTML;
-  if (esFinalizado) {
-    centroHTML = `
-      <div class="score-result">
-        <span class="score-result-num">${golesLocalReal}</span>
-        <span class="vs-label">—</span>
-        <span class="score-result-num">${golesVisitanteReal}</span>
-      </div>
-    `;
-  } else {
-    centroHTML = `
-      <div class="score-inputs">
-        <input class="score-input" type="number" inputmode="numeric" min="0" max="20" data-side="local"
-          value="${valorLocal}" placeholder="–" ${inputsDisabled ? 'disabled' : ''}>
-        <span class="vs-label">—</span>
-        <input class="score-input" type="number" inputmode="numeric" min="0" max="20" data-side="visitante"
-          value="${valorVisitante}" placeholder="–" ${inputsDisabled ? 'disabled' : ''}>
       </div>
     `;
   }
@@ -217,7 +280,7 @@ function renderTarjetaPartido(partido, prediccion, puntos) {
     <div class="match-card" data-partido-id="${partido.partido_id}" data-es-elim="${esElim}" data-equipo-local="${partido.equipo_local}" data-equipo-visitante="${partido.equipo_visitante}">
       <div class="match-top">
         <span class="match-meta">${partido.grupo ? partido.grupo + ' · ' : ''}${formatearHoraLocal(partido.fecha_hora_utc)}</span>
-        <span class="match-status ${estado.clase}">${estado.texto}</span>
+        <span class="match-status ${badgeMostrar.clase}">${badgeMostrar.texto}</span>
       </div>
       <div class="teams-row">
         <div class="team">
